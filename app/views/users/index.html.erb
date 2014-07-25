@@ -1,0 +1,147 @@
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12 col-sm-offset-3 col-sm-6">
+            <div class="panel panel-default">
+                <div class="panel-heading c-list">
+                    <span class="title"><%=@friends.count%> Friends</span>
+                    <ul class="pull-right c-controls">
+                        <li><a href="#cant-do-all-the-work-for-you" data-toggle="tooltip" data-placement="top" title="Like"><i class="glyphicon glyphicon-heart"></i></a></li>
+                        <li><a href="#" class="hide-search" data-command="toggle-search" data-toggle="tooltip" data-placement="top" title="Toggle Search"><i class="fa fa-ellipsis-v"></i></a></li>
+                    </ul>
+                </div>
+                
+                <div class="row" style="display: none;">
+                    <div class="col-xs-6">
+                        <div class="input-group c-search">
+                            <input type="text" class="form-control" id="contact-list-search">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-search text-muted"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <ul class="list-group" id="contact-list">
+                <% @friends.each_with_index do |friend,i| %>
+  				  <% break if i > 200 %>
+
+                    <li class="list-group-item">
+
+
+                        <div class="col-xs-4 col-sm-3">
+
+                            <% @user_impressions = User.all.find_by_uid(friend["id"]) %>
+                            <% if @user_impressions %>
+
+                            <%= link_to image_tag("http://graph.facebook.com/#{friend["id"]}/picture?width=55&height=55", style: "margin:1px;", class: "img-circle img-responsive"), user_path(@user_impressions) %>
+
+                            <% else %>
+
+                            <%= image_tag "http://graph.facebook.com/#{friend["id"]}/picture?width=55&height=55", style: "margin:1px;", class: "img-circle img-responsive" %>
+
+                            <% end %>
+
+
+                        </div>
+                        <%if @liked_users.include?(friend["id"])%>
+                                <button class="btn btn-sm btn-warning glyphicon glyphicon-remove clickable-icon pull-right" id="uid_<%=friend["id"]%>" onclick="remove_like('<%=friend["id"]%>');"></button>
+                            <%else%>
+                                <button class="btn btn-sm btn-danger glyphicon glyphicon-heart clickable-icon pull-right" id="uid_<%=friend["id"]%>" onclick="create_like('<%=friend["id"]%>');"></button>
+                            <%end%>
+
+
+                            <span class="name"><%=friend["name"] %></span><br />
+                            <% if @user_impressions %>
+                              <h5><label class="label label-primary"><%=@user_impressions.impressionist_count(:filter=>:session_hash)%> <span class="glyphicon glyphicon-eye-open"></span></label>
+                            <% end %>
+
+                            <% @user_messages = Message.find_by_uid(friend["id"]) %>
+                            <% if @user_messages %>
+                              <label class="label label-info">1<span class="glyphicon glyphicon-heart"></span></label></h5>
+                            <% end %>
+
+
+                        <div class="clearfix"></div>
+                    </li>
+                <% end %>
+
+                </ul>
+            </div>
+        </div>
+	</div>
+    
+    <div id="cant-do-all-the-work-for-you" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title" id="mySmallModalLabel">Ashley Jones</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="panel panel-default">
+              <%= form_for(@message) do |f| %>
+
+              <div class="panel-body">
+              <h4 class="panel-title">Who do you like?</h4>
+                <div class="form-group">
+
+                  <div id="the-basics">
+                    <input id="fb_friends" class="form-control" type="text" name="fb_friends">
+
+                  </div>
+                </div>
+                <div class="form-group">
+                  <textarea  name="message" class="form-control" placeholder="Optional Message"></textarea>
+                </div>
+              </div>
+              <div class="panel-footer">
+                  <input type="submit" class="btn btn-primary pull-right" value="Save">
+                  <div class="clearfix"></div>
+              </div>
+              <%end%>
+          </div> 
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+       function remove_like(fbuid){
+        $.ajax({
+            url: '/messages/'+fbuid+".json",
+            type: 'DELETE',
+            success: function(result) {
+            if (result.status=="ok"){
+                $("#uid_"+fbuid).removeClass("glyphicon-remove btn-primary");
+                $("#uid_"+fbuid).addClass("glyphicon-ok btn-danger");
+                $("#uid_"+fbuid).attr("onclick","create_like('"+fbuid+"')");
+                //alert(result.message);
+            }
+            }
+        });
+       }
+
+       function create_like(fbuid){
+        $.ajax({
+            url: "/messages.json",
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            data: '{"fb_friends":"' + fbuid + '", "message":""}',
+            dataType: "json",
+            success: function(result) {
+            if (result.status=="ok"){
+                $("#uid_"+fbuid).removeClass("glyphicon-ok btn-danger");
+                $("#uid_"+fbuid).addClass("glyphicon-remove btn-primary");
+                $("#uid_"+fbuid).attr("onclick","remove_like('"+fbuid+"')");
+                //alert(result.message);
+            }
+            }
+        });
+       }
+    </script>
+
+    <!-- JavaScrip Search Plugin -->
+    <script src="//rawgithub.com/stidges/jquery-searchable/master/dist/jquery.searchable-1.0.0.min.js"></script>
+
+    
+</div>

@@ -1,0 +1,194 @@
+<% if user_signed_in? %>
+  <div class="container">
+
+      <div class="row">
+
+        <div class="col-md-4 col-md-offset-1 col-sm-6 col-xs-10 col-xs-offset-1">
+          <div class="panel panel-success">
+              <div class="panel-heading">
+                <h3 class="panel-title">Your Feed</h3>
+              </div>
+              <div class="panel-body">
+              <strong>Your likes</strong><br />
+                <% @likers.each do |liker| %>
+                 Someone liked you <%=time_ago_in_words(liker.created_at)%> ago<br />
+                <% end %>
+              <strong>Your friends</strong><br />
+
+              </div>
+          </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6 col-xs-10 col-xs-offset-1">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Who do you like?</h3>
+            </div>
+
+            <%= form_for(@message) do |f| %>
+              <div class="panel-body">
+                <div class="form-group">
+
+                  <div id="the-basics">
+                    <input id="fb_friends" class="form-control" type="text" name="fb_friends">
+
+                  </div>
+                </div>
+                <div class="form-group">
+                  <textarea name="message" rows="4" class="form-control" placeholder="Optional Message"></textarea>
+                </div>
+              </div>
+              <div class="panel-footer">
+
+                  <input type="submit" class="btn btn-sm btn-info pull-right" value="Save">
+                  <img style="height:22px; width: 22px;" src="http://www.troop-7.org/patrols/ninjas/choices/ninja6.jpg" />
+                  <div class="clearfix"></div>
+              </div>
+              <%end%>
+          </div>  
+        </div>
+
+        <div class="col-md-3 col-sm-4 col-xs-7">
+
+         <div class="row">
+          <div class="col-md-11 col-sm-12 col-xs-12 col-xs-offset-4">
+           <div class="panel panel-default">
+            <div class="panel-heading">
+              <h4><%=@name%>
+              <%= image_tag "http://graph.facebook.com/#{@user.uid}/picture?width=30&height=30", class: "img-rounded pull-right" %>
+              </h4>
+              <div class="clearfix"></div>
+            </div>
+            <div class="panel-body">
+              <div class="progress">
+                <div class="progress-bar progress-bar-danger progress-bar-striped active"  role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 45%">
+                  <span class="sr-only">45% Complete</span>
+                </div>
+              </div>
+              <div class="progress">
+                <div class="progress-bar progress-bar-success progress-bar-striped active"  role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 75%">
+                  <span class="sr-only">75% Complete</span>
+                </div>
+              </div>
+
+
+                  <h3><label class="label label-primary pull-left"><%=@user.impressionist_count(:filter=>:session_hash)%> <span class="glyphicon glyphicon-eye-open"></span></label></h3>
+
+
+                  <h3><label class="label label-danger pull-right"><%=@likers.count%> <span class="glyphicon glyphicon-heart"></span></label></h3>
+
+
+
+            </div>
+           </div>
+          </div>
+         </div>
+
+         <% if @user == current_user %>
+         <div class="row">
+          <div class="col-md-11 col-sm-12 col-xs-12 col-xs-offset-4">
+           <div class="panel panel-danger">
+            <div class="panel-heading">
+              <strong>Matches</strong>
+              <label class="label label-danger pull-right"><%=@matches.count%></label>
+            </div>
+            <div class="panel-body">
+
+            <% @matches.each do |like| %>
+             <% match_uid = current_user==like.user ? like.uid : like.user.uid%>
+
+             <% @liker = @graph.get_picture(match_uid) %>
+             <%= link_to image_tag(@liker, style: "margin:1px; width:40px; height:40px;", class: "img-rounded", :data => {:toggle=>"tooltip", :placement=>"bottom", :title=> time_ago_in_words(like.created_at.to_s) + " ago"}), user_path(like.user) %>
+
+            <% end %>
+            </div>
+           </div>
+          </div>
+         </div>
+         <% end %>
+
+         <% if @user == current_user %>
+            <% person = "you" %>
+         <% else %>
+            <% person = "them" %>
+         <% end %>
+         <div class="row">
+          <div class="col-md-11 col-sm-12 col-xs-12 col-xs-offset-4">
+           <div class="panel panel-warning">
+            <div class="panel-heading">
+              <strong>People that like <%=person%></strong>
+              <label class="label label-warning pull-right"><%=@likers.count%></label>
+            </div>
+            <div class="panel-body">
+            <% @likers.each do |liker| %>
+
+             <%= link_to image_tag("https://lh4.googleusercontent.com/-CcNROPyLx-c/AAAAAAAAAAI/AAAAAAAAAEU/2cjMUyV4idk/photo.jpg", style: "margin:1px; width:40px; height:40px;", class: "img-rounded", :data => {:toggle=>"tooltip", :placement=>"bottom", :title=> time_ago_in_words(liker.created_at.to_s) + " ago"}), user_path(liker.user) %>
+            <% end %>
+
+            </div>
+           </div>
+          </div>
+         </div>
+
+         <% if @user == current_user %>
+         <div class="row">
+          <div class="col-md-11 col-sm-12 col-xs-12 col-xs-offset-4">
+           <div class="panel panel-info">
+            <div class="panel-heading">
+              <strong>People you like</strong>
+              <label class="label label-info pull-right"><%=@likes.count%></label>
+            </div>
+            <div class="panel-body">
+
+            <% @likes.each do |like| %>
+             <% @liker = @graph.get_picture(like.uid) %>
+
+             <%= link_to image_tag(@liker, style: "margin:1px; width:40px; height:40px;", class:"img-rounded friend-image",:id=>"photo-#{like.uid}", :data => {:toggle=>"tooltip", :placement=>"bottom", :title=> time_ago_in_words(like.created_at.to_s) + " ago", :uid=>like.uid}), "http://facebook.com/#{like.uid}/" %>
+
+             <span class="glyphicon glyphicon-remove-sign clickable-icon" id="close-icon-<%=like.uid%>" style=" display: none; top:-10px !important; margin-left:-12px;" onclick="remove_like('<%=like.uid%>');"></span>
+
+            <% end %>
+            </div>
+          </div>
+          </div>
+         </div>
+         <% end %>
+        </div>
+        
+
+
+      </div>
+
+  </div> 
+
+<% end %>
+
+
+<script type="text/javascript">
+    function remove_like(fbuid){
+        $.ajax({
+            url: '/messages/'+fbuid+".json",
+            type: 'DELETE',
+            success: function(result) {
+            if (result.status=="ok"){
+                $("#photo-"+fbuid).hide();
+                $("#close-icon-"+fbuid).hide();
+            }
+            }
+        });
+    }
+$(document).ready(function () {
+    $("#fb_friends").tokenInput("/get_friends.json",{tokenLimit: 1, searchDelay: 0, minChars: 2, resultsLimit: 10, hintText: "Search Facebook friends"});
+    $(".img-rounded").tooltip();
+
+    $(".friend-image").hover(
+      function(){
+        uid=$(this).data("uid");
+        $("#close-icon-"+uid).show();
+      },
+      function(){
+        uid=$(this).data("uid");
+        $("#close-icon-"+uid).setTimeout();
+      });
+});
+</script>
