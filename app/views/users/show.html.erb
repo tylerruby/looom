@@ -1,99 +1,100 @@
   <div class="container">
     <div class="row">
-      <div class="col-md-7 col-md-offset-2 col-sm-7 col-sm-offset-2 col-xs-10 col-xs-offset-1">
+      <div class="col-md-6 col-md-offset-2 col-sm-7 col-sm-offset-2 col-xs-10 col-xs-offset-1">
         <img src="http://www.tipsfromthetopfloor.com/wp-content/panorama.jpg" class="img-responsive" style="border-top-left-radius: 6px; border-top-right-radius: 6px;" />
 
         <div class="panel panel-default">
-          <div class="panel-heading" style="height:43px;">
+          <div class="panel-heading" style="background:b7b7b7;height:42px;">
             <div class="panel-mt">
                 <%=@name%>
                 <label class="label label-primary"><%=@user.impressionist_count(:filter=>:session_hash)%> <span class="glyphicon glyphicon-eye-open"></span></label>
                 <label class="label label-danger"><%=@likers.count%> <span class="glyphicon glyphicon-heart"></span></label>
                 <label class="label label-warning"><%=@likers.count%> <span class="glyphicon glyphicon-star"></span></label>
-
-
+                
               <%= image_tag "http://graph.facebook.com/#{@user.uid}/picture?width=40&height=40", class: "img-rounded pull-right" %>
             </div>
-            <div class="clearfix"></div>
           </div>
           <div class="panel-body">
             <div class="row">
               <div class="col-md-7 col-sm-12 col-xs-12">
-                <div class="panel panel-default">
-                    <table class="table table-hover">
-                      <tbody>
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="panel panel-default">
+                      <table class="table table-hover">
+                        <tbody>
 
-                        <% @likers.each do |liker| %>
-                        <tr>
-                         <td>
-                          <strong>
-                          <span class="text-danger glyphicon glyphicon-heart"></span>
-                           <%=time_ago_in_words(liker.created_at)%> ago
-                          </strong>
-                         </td>
-                         <td>Someone liked you</td>
-                        </tr>
-                        <% end %>
+                          <% @likers.each do |liker| %>
+                          <tr>
+                           <td>
+                            <strong>
+                            <span class="text-danger glyphicon glyphicon-heart"></span>
+                             <%=time_ago_in_words(liker.created_at)%> ago
+                            </strong>
+                           </td>
+                           <td>Someone liked you</td>
+                          </tr>
+                          <% end %>
 
-                        <tr>
-                         <td>
-                         <strong>
-                         <span class="text-info glyphicon glyphicon-eye-open"></span>
-                         2 days ago
-                         </strong>
-                         </td>
-                         <td>Someone viewed you</td>
-                        </tr>
-                        <tr>
-                         <td>
-                         <strong>
-                         <span class="text-warning glyphicon glyphicon-user"></span>
-                         3 days ago
-                         </strong>
-                         </td>
-                         <td>Someone followed you</td>
-                        </tr>
-                      </tbody>
-                    </table>
+                          <tr>
+                           <td>
+                           <strong>
+                           <span class="text-info glyphicon glyphicon-eye-open"></span>
+                           2 days ago
+                           </strong>
+                           </td>
+                           <td>Someone viewed you</td>
+                          </tr>
+                          <tr>
+                           <td>
+                           <strong>
+                           <span class="text-warning glyphicon glyphicon-user"></span>
+                           3 days ago
+                           </strong>
+                           </td>
+                           <td>Someone followed you</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
               </div>
               <% if @user == current_user %>
               <div class="col-md-5 col-sm-12 col-xs-12">
-                <div class="panel panel-default">
-                  <div class="panel-body">
-                    <h3 class="panel-title">Matches
-                      <label class="label label-info pull-right"><%=@matches.count%></label>
-                    </h3>
-                    <div class="clearfix"></div>
-                  </div>
-                  <div class="panel-heading">
-                    <% @matches.each do |like| %>
-                     <% match_uid = current_user==like.user ? like.uid : like.user.uid%>
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="panel panel-default">
+                      <div class="panel-heading">
+                        <h3 class="panel-title">Matches
+                          <label class="label label-info pull-right"><%=@matches.count%></label>
+                        </h3>
+                      </div>
+                      <div class="panel-body2">
+                        <% @matches.each do |like| %>
+                         <% match_uid = current_user==like.user ? like.uid : like.user.uid%>
 
-                     <% @liker = @graph.get_picture(match_uid) %>
-                     <%= link_to image_tag(@liker, style: "margin:1px; width:40px; height:40px;", class: "img-rounded", :data => {:toggle=>"tooltip", :placement=>"bottom", :title=> time_ago_in_words(like.created_at.to_s) + " ago"}), user_path(like.user) %>
-
-                    <% end %>
+                         <% @liker = @graph.get_picture(match_uid) %>
+                         <%= link_to image_tag(@liker, style: "margin:1px; width:40px; height:40px;", class: "img-rounded", :data => {:toggle=>"tooltip", :placement=>"bottom", :title=> time_ago_in_words(like.created_at.to_s) + " ago"}), user_path(like.user) %>
+                        <% end %>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-              <% end %>
-            </div>
-            <% if @user == current_user %>
-            <div class="row">
-             <div class="col-md-5 col-md-offset-7 col-sm-12 col-xs-12">
-                <div class="panel panel-default">
-                  <div class="panel-body">
-                    <h3 class="panel-title">You Like
-                    <label class="label label-primary pull-right"><%=@likes.count%></label>
-                    </h3>
-                  </div>
-                  <div class="panel-heading">
-                    <% @likes.each do |like| %>
-                      <% @liker = @graph.get_picture(like.uid) %>
-                      <%= link_to image_tag(@liker, style: "margin:1px; width:40px; height:40px;", class:"img-rounded friend-image",:id=>"photo-#{like.uid}", :data => {:toggle=>"tooltip", :placement=>"bottom", :title=> time_ago_in_words(like.created_at.to_s) + " ago", :uid=>like.uid}), "http://facebook.com/#{like.uid}/" %>
-                      <span class="glyphicon glyphicon-remove clickable-icon" id="close-icon-<%=like.uid%>" style=" display: none; top:-10px !important; margin-left:-12px;" onclick="remove_like('<%=like.uid%>');"></span>
-                    <% end %>
+            
+                  <div class="col-md-12">
+                    <div class="panel panel-default">
+                      <div class="panel-heading">
+                        <h3 class="panel-title">You Like
+                        <label class="label label-primary pull-right"><%=@likes.count%></label>
+                        </h3>
+                      </div>
+                      <div class="panel-body2">
+                        <% @likes.each do |like| %>
+                          <% @liker = @graph.get_picture(like.uid) %>
+                          <%= link_to image_tag(@liker, style: "margin:1px; width:40px; height:40px;", class:"img-rounded friend-image",:id=>"photo-#{like.uid}", :data => {:toggle=>"tooltip", :placement=>"bottom", :title=> time_ago_in_words(like.created_at.to_s) + " ago", :uid=>like.uid}), "http://facebook.com/#{like.uid}/" %>
+                          <span class="glyphicon glyphicon-remove clickable-icon" id="close-icon-<%=like.uid%>" style=" display: none; top:-10px !important; margin-left:-12px;" onclick="remove_like('<%=like.uid%>');"></span>
+                        <% end %>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
